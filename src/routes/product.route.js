@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllProducts, getProductwithId, createProduct, getLength } from "../controllers/product.controller.js";
+import { getAllProducts, getProductwithId, createProduct, getLength, deleteProduct } from "../controllers/product.controller.js";
 import { verifyUser } from "../middlewares/verifyUser.middleware.js";
 
 const router = Router()
@@ -15,6 +15,7 @@ router
 router
     .route("/:id")
     .get(getProductwithId)
+    .delete(verifyUser, deleteProduct)
 
 router
     .route("/register")

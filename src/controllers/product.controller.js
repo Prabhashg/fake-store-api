@@ -24,7 +24,7 @@ const getAllProducts = async (req, res) => {
 
 const getProductwithId = async (req, res) => {
    try {
-      const response = await db.query("SELECT * FROM products WHERE id = $1", [req.params.id])
+      response = await db.query("SELECT * FROM products WHERE id = $1", [req.params.id])
       const result = response.rows[0]
       res.status(200).json(new ApiResponse(200, result, "success"))
    } catch (error) {
@@ -38,7 +38,7 @@ const createProduct = async (req, res) => {
    const created_by = req.user.name
 
    try {
-      const response = await db.query("INSERT INTO products \
+      response = await db.query("INSERT INTO products \
          (id, title, description, rating_rate, rating_count, price, image_url, created_at, created_by)  \
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)", [id, title, description, rating_rate, rating_count, price, img_url, created_at, created_by])
    
@@ -53,14 +53,23 @@ const createProduct = async (req, res) => {
 
 const getLength = async ( _ , res) => {
    try {
-      const response = await db.query("SELECT count(*) FROM products")
+      response = await db.query("SELECT count(*) FROM products")
       res.status(200).json(new ApiResponse(200, {length: response.rows[0]}, "success"))
    } catch (error) {
       console.log(error)
    }
 }
 
-export { getAllProducts, getProductwithId, createProduct, getLength }
+const deleteProduct = async (req, res) => {
+   try {
+      response = await db.query("DELETE FROM products WHERE id = $1", [req.params.id])
+      res.status(200).json(new ApiResponse(200, {}, "successfully deleted"))
+   } catch (error) {
+      console.log(error)
+   }
+}
+
+export { getAllProducts, getProductwithId, createProduct, getLength, deleteProduct }
 
 
 
