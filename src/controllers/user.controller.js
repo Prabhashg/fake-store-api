@@ -6,7 +6,7 @@ import { setUserToMap, sessionIdToUserMap } from "../services/usermap.js"
 
 const getAllUsers = async (_, res) => {
    const result = await db.query("SELECT * FROM users")
-   res.status(200).json(result.rows)
+   res.status(200).json(new ApiResponse(200, result.rows, "success"))
 }
 
 const getUserWithId = async (req, res) => {
