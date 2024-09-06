@@ -1,94 +1,107 @@
-import * as db from "../db/index.js"
+import { Product }from "../db/index.js"
 import ApiResponse from "../utils/ApiResponse.js"
 
-let response
-
 const getAllProducts = async (req, res) => {
+   let products
    try {
          if (req.query.page && req.query.records) {
             const { page, records } = req.query
             const limit = records
             const offset = records * (page - 1)
 
-            response = await db.query("SELECT * FROM products LIMIT $1 OFFSET $2", [limit, offset])
+            products = await Product.findAll({
+               limit,
+               offset
+            })
+
          } else {
-            response = await db.query("SELECT * FROM products")
+            products = await Product.findAll({})
+            
          }
 
-         const result = response.rows
-         res.status(200).json(new ApiResponse(200, result, "success"))
+         return res.status(200).json(new ApiResponse(200, products, "success"))
    } catch (error) {
       console.log(error)
+      return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
    }
 }
 
 const getProductwithId = async (req, res) => {
    try {
-      response = await db.query("SELECT * FROM products WHERE id = $1", [req.params.id])
-      const result = response.rows[0]
-      res.status(200).json(new ApiResponse(200, result, "success"))
+      const { id } = req.params
+      const product = await Product.findOne({
+         where: {
+            product_id : id
+         }
+      })
+
+      if (!product) {
+         return res.status(400).json(new ApiResponse(400, {}, `Product with id: ${id} doesn't exist`))
+      } else {
+         return res.status(200).json(new ApiResponse(200, product, "success"))
+      }
    } catch (error) {
       console.log(error)
+      return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
    }
 }
 
 const createProduct = async (req, res) => {
    const { id, title, description, rating_rate, rating_count, price, img_url } = req.body
-   const created_at = new Date(Date.now()).toISOString().replace('T', ' ').replace('Z', '')
-   const created_by = req.user.name
+   const createdBy =  req.user.name     //"user1"
 
    try {
-      response = await db.query("INSERT INTO products \
-         (id, title, description, rating_rate, rating_count, price, image_url, created_at, created_by)  \
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)", [id, title, description, rating_rate, rating_count, price, img_url, created_at, created_by])
-   
-      if(response.rowCount === 1){
-         res.status(201).json(new ApiResponse(201, {}, "Product added successfully"))
-      }
+      const product = await Product.create({
+         product_id: id,
+         title, 
+         description, 
+         rating_rate, 
+         rating_count, 
+         price,
+         image_url: img_url,
+         createdBy
+      })
 
+      return res.status(201).json(new ApiResponse(201, product, "success"))
    } catch (error) {
-      console.log(error.detail)
+      if (error.name === 'SequelizeUniqueConstraintError') {
+         console.log('Product Id must be unique.');
+         return res.status(400).json(new ApiResponse(400, {}, "Product Id must be unique"))
+       } else {
+         console.error('An error occurred:', error);
+         return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
+       }
    }
 }
 
 const getLength = async ( _ , res) => {
    try {
-      response = await db.query("SELECT count(*) FROM products")
-      res.status(200).json(new ApiResponse(200, {length: response.rows[0]}, "success"))
+      const count = await Product.count()
+      return res.status(200).json(new ApiResponse(200, {length : count}, "success"))     // Need to change in frontend code too
    } catch (error) {
       console.log(error)
+      return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
    }
 }
 
 const deleteProduct = async (req, res) => {
+   const { id } = req.params
    try {
-      response = await db.query("DELETE FROM products WHERE id = $1", [req.params.id])
-      res.status(200).json(new ApiResponse(200, {}, "successfully deleted"))
+      const isDeleted = await Product.destroy({
+         where: {
+            product_id : id
+         }
+      })
+
+      if(!isDeleted){
+         return res.status(400).json(new ApiResponse(400, {}, "Product doesn't exist to delete"))
+      }
+
+      return res.status(200).json(new ApiResponse(200, {}, "success"))
    } catch (error) {
       console.log(error)
+      return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
    }
 }
 
 export { getAllProducts, getProductwithId, createProduct, getLength, deleteProduct }
-
-
-
-
-
-
-
-
-
-
-
-// const response = await db.query("CREATE TABLE products ( \
-//    id SERIAL PRIMARY KEY,                             \
-//    title VARCHAR (50) UNIQUE NOT NULL,                \
-//    description VARCHAR (255) NOT NULL,                \
-//    rating_rate SMALLINT NOT NULL,                     \
-//    rating_count SMALLINT NOT NULL,                    \
-//    price SMALLINT NOT NULL,                           \
-//    image_url VARCHAR (512) NOT NULL,                  \
-//    created_at TIMESTAMP NOT NULL,                     \
-//    created_by VARCHAR (255) NOT NULL)                 \
-// ")

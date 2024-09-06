@@ -1,7 +1,8 @@
 import { Router } from "express"
 import {getAllUsers, getUserWithId, createUser, loginUser, logoutUser, updateUserWithId, deleteUserWithId } from "../controllers/user.controller.js"
 import { verifyUser } from "../middlewares/verifyUser.middleware.js"
-const router = Router();
+
+const router = Router()
 
 router
     .route("/")
@@ -26,4 +27,4 @@ router
     .post(verifyUser, logoutUser)
 
 
-export default router;
+export default router

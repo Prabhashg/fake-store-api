@@ -1,15 +1,26 @@
-import pg from "pg";
+import "dotenv/config"
+import { DataTypes, Sequelize } from "sequelize"
+import defineUserModel from "../models/user.model.js"
+import defineProductModel from "../models/product.model.js"
 
-const { Pool } = pg;
-
-const pool = new Pool({
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_DATABASE
+const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host : process.env.DB_HOST,
+    port : process.env.DB_PORT,
+    dialect : 'postgres'
 })
 
-export const query = (text, params, callback) => {
-    return pool.query(text, params, callback)
-}
+
+const User = defineUserModel(sequelize, DataTypes)
+const Product = defineProductModel(sequelize, DataTypes)
+
+
+await User.sync({alter: true})
+    .then(() => console.log("User Table Synced sucessfully"))
+    .catch(err => {console.log("User Table sync failed", err)})
+
+await Product.sync({alter: true})
+    .then(() => console.log("Product Table Synced successfully"))
+    .catch(err => console.log("Product Table sync failed", err))
+
+
+export {sequelize, User, Product}
