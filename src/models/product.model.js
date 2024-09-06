@@ -10,7 +10,7 @@ const defineProductModel = (db, DataTypes) => {
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     rating_rate: {
