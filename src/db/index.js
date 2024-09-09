@@ -14,13 +14,4 @@ const User = defineUserModel(sequelize, DataTypes)
 const Product = defineProductModel(sequelize, DataTypes)
 
 
-await User.sync({alter: true})
-    .then(() => console.log("User Table Synced sucessfully"))
-    .catch(err => {console.log("User Table sync failed", err)})
-
-await Product.sync({alter: true})
-    .then(() => console.log("Product Table Synced successfully"))
-    .catch(err => console.log("Product Table sync failed", err))
-
-
 export {sequelize, User, Product}

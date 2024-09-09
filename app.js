@@ -17,6 +17,3 @@ app.use(cookieParser())
 mountRoutes(app)
 
 export default app;
-
-
-
