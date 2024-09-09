@@ -1,3 +1,4 @@
+import { where } from "sequelize"
 import { Product }from "../db/index.js"
 import ApiResponse from "../utils/ApiResponse.js"
 
@@ -11,7 +12,10 @@ const getAllProducts = async (req, res) => {
 
             products = await Product.findAll({
                limit,
-               offset
+               offset, 
+               order : [
+                  ['product_id']
+               ]
             })
 
          } else {
@@ -104,4 +108,16 @@ const deleteProduct = async (req, res) => {
    }
 }
 
-export { getAllProducts, getProductwithId, createProduct, getLength, deleteProduct }
+const updateProduct = async (req, res) => {
+   const {title, description, rating_rate, rating_count, price, img_url} = req.body
+   const response = await Product.update({title, description, rating_count, rating_rate, price, image_url: img_url}, {
+      where: {
+         product_id : req.params.id
+      }
+   })
+
+   console.log(response)
+   res.status(200).json(new ApiResponse(200, {}, "successfully updated"))
+}
+
+export { getAllProducts, getProductwithId, createProduct, getLength, deleteProduct, updateProduct }

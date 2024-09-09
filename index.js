@@ -4,6 +4,7 @@ import { sequelize } from "./src/db/index.js"
 
 sequelize.sync()
     .then(() => {
+        console.log("DB connected...")
         app.listen(process.env.PORT, () => {
             console.log(`server listening on port: ${process.env.PORT}...`)
         })
