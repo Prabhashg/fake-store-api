@@ -1,4 +1,3 @@
-import { where } from "sequelize"
 import { Product }from "../db/index.js"
 import ApiResponse from "../utils/ApiResponse.js"
 
@@ -116,8 +115,11 @@ const updateProduct = async (req, res) => {
       }
    })
 
-   console.log(response)
-   res.status(200).json(new ApiResponse(200, {}, "successfully updated"))
+   if(response){ //need to check -----------------> NOt sure ------------------------------------->
+      return res.status(200).json(new ApiResponse(200, {}, "successfully updated"))
+   }
+
+   return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
 }
 
 export { getAllProducts, getProductwithId, createProduct, getLength, deleteProduct, updateProduct }
