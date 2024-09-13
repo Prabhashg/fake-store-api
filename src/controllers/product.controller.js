@@ -2,14 +2,14 @@ import { Product }from "../db/index.js"
 import ApiResponse from "../utils/ApiResponse.js"
 
 const getAllProducts = async (req, res) => {
-   let products
+   
    try {
          if (req.query.page && req.query.records) {
             const { page, records } = req.query
             const limit = records
             const offset = records * (page - 1)
 
-            products = await Product.findAll({
+            const {count, rows} = await Product.findAndCountAll({
                limit,
                offset, 
                order : [
@@ -17,12 +17,14 @@ const getAllProducts = async (req, res) => {
                ]
             })
 
+            res.status(200).json(new ApiResponse(200, {count: count, products: rows}, "success"))
+
+
          } else {
-            products = await Product.findAll({})
-            
+            const {count, products} = await Product.findAndCountAll({})
+            res.status(200).json(new ApiResponse(200, {count : count, products: products}, "success"))
          }
 
-         return res.status(200).json(new ApiResponse(200, products, "success"))
    } catch (error) {
       console.log(error)
       return res.status(500).json(new ApiResponse(500, {}, "Internal Error Occured"))
